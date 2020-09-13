@@ -1,0 +1,32 @@
+bootcmd:
+  - "curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -"
+  - "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -"
+apt:
+  sources:
+    kubernetes:
+      source: "deb https://apt.kubernetes.io/ kubernetes-xenial main"
+    docker:
+      source: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+package_update: true
+packages:
+  - kubelet
+  - kubeadm
+  - kubectl
+  - containerd.io
+  - docker-ce
+  - docker-ce-cli
+write_files:
+  - path: /etc/sysctl.d/k8s.conf
+    content: |
+      net.bridge.bridge-nf-call-ip6tables = 1
+      net.bridge.bridge-nf-call-iptables = 1
+  - path: /etc/docker/daemon.json
+    content: |
+      {
+        "exec-opts": ["native.cgroupdriver=systemd"],
+        "log-driver": "json-file",
+        "log-opts": {
+            "max-size": "100m"
+        },
+        "storage-driver": "overlay2"
+      }
